@@ -13,6 +13,7 @@ export function useSpeechRecognition({
   const [isSupported, setIsSupported] = useState(true);
   const recognitionRef = useRef<any>(null);
   const finalTranscriptRef = useRef('');
+  const isListeningRef = useRef(false);
 
   useEffect(() => {
     // Check if browser supports speech recognition
@@ -59,7 +60,7 @@ export function useSpeechRecognition({
     };
 
     recognition.onend = () => {
-      if (isListening) {
+      if (isListeningRef.current) {
         // Restart if we're still supposed to be listening
         try {
           recognition.start();
@@ -78,12 +79,13 @@ export function useSpeechRecognition({
         recognitionRef.current.stop();
       }
     };
-  }, [onTranscriptUpdate, onEnd, isListening]);
+  }, [onTranscriptUpdate, onEnd]);
 
   const startListening = useCallback(() => {
     if (!recognitionRef.current || !isSupported) return;
 
     finalTranscriptRef.current = '';
+    isListeningRef.current = true;
     setIsListening(true);
 
     try {
@@ -96,6 +98,7 @@ export function useSpeechRecognition({
   const stopListening = useCallback(() => {
     if (!recognitionRef.current) return;
 
+    isListeningRef.current = false;
     setIsListening(false);
     recognitionRef.current.stop();
   }, []);
